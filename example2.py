@@ -30,14 +30,14 @@ def build_child_conds(suppliers, regions, price):
     subq = []
 
     if suppliers:
-        subq.append(Q.Term('supplier_id', suppliers))
+        subq.append(Q.Term('sup_id', suppliers))
 
     if regions:
         subq.append(Q.Or(
-            Q.Term('region_id', regions),
+            Q.Term('regions', regions),
             # or
             Q.Not(
-                Q.Exists('region_id')
+                Q.Exists('regions')
             )
         ))
 
@@ -46,7 +46,7 @@ def build_child_conds(suppliers, regions, price):
     if (not subq) and (not prange):
         return None
 
-    q = Q.HasChild('price')
+    q = Q.HasChild('nom_prices')
 
     if subq:
         q.set_query(Q.And(*subq))
@@ -54,7 +54,7 @@ def build_child_conds(suppliers, regions, price):
     if prange:
         q.set_filter(
             Q.Nested('prices').set_filter(
-                Q.Range('price.value', prange)
+                Q.Range('prices.value', prange)
             )
         )
 
@@ -75,7 +75,7 @@ def build_conds(filters):
 
     mnfs = filters.pop('manufacturer', [])
     if mnfs:
-        conds.append(Q.Term('manufacturer_id', mnfs))
+        conds.append(Q.Term('man_id', mnfs))
 
     for k, v in filters.items():
         n = k.lower()
@@ -96,38 +96,41 @@ if __name__ == '__main__':
     q = Q.QueryConst()
 
     filters = {
-        'supplier': [1, 2, 3],
+        #'supplier': 2,
         'price': {
-            'min': 10,
-            'max': 1000
+            'min': 1,
+            'max': 30
         },
-        'regions': [10, 15, 60],
-        'manufacturer': [89, 90],
-        'par1': 'val1',
-        'par2': True,
-        'par3': 'val3',
-        'par4': 100,
-        'par5': [1, 2, 3]
+        #'regions': [10, 15, 60],
+        'manufacturer': 3,
+        #'par1': 'val1',
+        #'par2': True,
+        #'par3': 'val3',
+        #'par4': 100,
+        #'par5': [1, 2, 3],
+        #'actual': False,
     }
-    search_string = 'foo'
+    search_string = None  # 'foo'
+    parent = 0
 
     filter_conds = build_conds(filters)
 
     if search_string:
         filter_conds.append(
             Q.Or(*[
-                Q.Match(n, search_string) for n in ('foo', 'bar', 'baz')
+                Q.Match(n, search_string) for n in ('name', 'man_code', 'code')
             ])
         )
+
     else:
         filter_conds.append(
-            Q.Term('parent', 10)
+            Q.Term('parent', parent)
         )
 
     q.Where(
         Q.Or(
             Q.And(
-                Q.Term('parent', 10),
+                Q.Term('parent', parent),
                 Q.IsTrue('is_parent'),
             ),
             # or
@@ -137,14 +140,12 @@ if __name__ == '__main__':
         )
     )
 
-    q.Sort(
-        'name',
-        'id',
-        date='desc',
-        key='asc'
-    )
+    q.Sort('name')
 
+    '''
     print(json.dumps(
         json.loads(repr(q)),
         indent=4)
     )
+    '''
+    print(repr(q))

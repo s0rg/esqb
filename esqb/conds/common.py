@@ -75,7 +75,9 @@ class Range(KVCond):
     def attach(self, tree):
         _min, _max = self.val
         tree['range'] = {
-            'gte': _min,
-            'lte': _max
+            self.key: {
+                'gte': _min,
+                'lte': _max
+            }
         }
         return tree
