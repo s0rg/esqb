@@ -6,6 +6,31 @@ class Cond(object):
         raise NotImplemented('Cond.attach()')
 
 
+class CompoundCond(Cond):
+    _filter = None
+    _query = None
+
+    def set_filter(self, cond=None):
+        self._filter = cond
+        return self
+
+    def set_query(self, cond=None):
+        self._query = cond
+        return self
+
+    def join(self, upper):
+        if self._query:
+            self._query.attach(
+                upper.setdefault('query', {})
+            )
+
+        if self._filter:
+            self._filter.attach(
+                upper.setdefault('filter', {})
+            )
+        return upper
+
+
 class KVCond(Cond):
 
     def __init__(self, key, val):
@@ -13,27 +38,15 @@ class KVCond(Cond):
         self.val = val
 
 
-class HasRelationCond(Cond):
+class HasRelationCond(CompoundCond):
 
     def __init__(self, who, wtype, cond):
         self.who = who
         self.wtype = wtype
-        self.cond = cond
-        self._filter = None
+        self.set_query(cond)
 
     def attach(self, tree):
-        d = {
+        tree[self.who] = self.join({
             'type': self.wtype,
-            'query': self.cond.attach({}),
-        }
-        if self._filter:
-            self._filter.attach(
-                d.setdefault('filter', {})
-            )
-
-        tree[self.who] = d
+        })
         return tree
-
-    def set_filter(self, cond):
-        self._filter = cond
-        return self

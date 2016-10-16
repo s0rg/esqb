@@ -18,7 +18,7 @@ from esqb.conds.relation import (
     HasChild,
     HasParent,
 )
-from esqb.conds.compound import (
+from esqb.conds.logical import (
     And,
     Or,
     Not,

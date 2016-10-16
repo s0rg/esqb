@@ -23,45 +23,52 @@ def parse_range(rd):
     )
 
 
+def build_child_conds(suppliers, regions, price):
+    subq = []
+
+    if suppliers:
+        subq.append(Q.Term('supplier_id', suppliers))
+
+    if regions:
+        subq.append(Q.Or(
+            Q.Term('region_id', regions),
+            # or
+            Q.Not(
+                Q.Exists('region_id')
+            )
+        ))
+
+    if (not subq) and (not price):
+        return None
+
+    q = Q.HasChild('price')
+
+    if subq:
+        q.set_query(Q.And(*subq))
+
+    if price:
+        pt = parse_range(price)
+        if pt:
+            q.set_filter(
+                Q.Nested('prices').set_filter(
+                    Q.Range('price.value', pt)
+                )
+            )
+
+    return q
+
+
 def build_conds(filters):
     conds = []
 
     if any([k in CONST_FILTER_KEYS for k in filters.keys()]):
-
-        subq = []
-
-        sups = filters.pop('supplier', [])
-        if sups:
-            subq.append(Q.Term('supplier_id', sups))
-
-        prcs = filters.pop('price', {})
-        if prcs:
-            prcs = parse_range(prcs)
-
-        regs = filters.pop('regions', [])
-        if regs:
-            subq.append(Q.Or(
-                Q.Term('region_id', regs),
-                # or
-                Q.Not(
-                    Q.Exists('region_id')
-                )
-            ))
-
+        subq = build_child_conds(
+            filters.pop('supplier', None),
+            filters.pop('regions', None),
+            filters.pop('price', None),
+        )
         if subq:
-            childq = Q.HasChild(
-                'price',
-                Q.And(*subq)
-            )
-
-            if prcs:
-                childq.set_filter(
-                    Q.Nested('prices').set_filter(
-                        Q.Range('price.value', prcs)
-                    )
-                )
-
-            conds.append(childq)
+            conds.append(subq)
 
     mnfs = filters.pop('manufacturer', [])
     if mnfs:
@@ -94,8 +101,10 @@ if __name__ == '__main__':
         'regions': [10, 15, 60],
         'manufacturer': [89, 90],
         'par1': 'val1',
-        'par2': 'val2',
+        'par2': True,
         'par3': 'val3',
+        'par4': 100,
+        'par5': [1, 2, 3]
     }
     search_string = 'foo'
 

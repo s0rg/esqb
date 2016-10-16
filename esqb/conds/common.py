@@ -1,6 +1,7 @@
 from esqb.conds.base import (
     Cond,
     KVCond,
+    CompoundCond,
 )
 
 
@@ -16,33 +17,16 @@ class Exists(Cond):
         return tree
 
 
-class Nested(Cond):
+class Nested(CompoundCond):
 
-    def __init__(self, name, query=None):
+    def __init__(self, name, cond=None):
         self._name = name
-        self._query = query
-        self._filter = None
-
-    def set_query(self, cond=None):
-        self._query = cond
-        return self
-
-    def set_filter(self, cond=None):
-        self._filter = cond
-        return self
+        self.set_query(cond)
 
     def attach(self, tree):
-        d = {
+        tree['nested'] = self.join({
             'path': self._name,
-        }
-        if self._query:
-            self._query.attach(d.setdefault('query', {}))
-
-        if self._filter:
-            self._filter.attach(d.setdefault('filter', {}))
-
-        tree['nested'] = d
-
+        })
         return tree
 
 
