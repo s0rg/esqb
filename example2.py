@@ -11,6 +11,9 @@ CONST_FILTER_KEYS = frozenset([
 
 
 def parse_range(rd):
+    if not rd:
+        return None
+
     _min = int(rd.get('min', 0))
     _max = int(rd.get('max', 0))
 
@@ -38,7 +41,9 @@ def build_child_conds(suppliers, regions, price):
             )
         ))
 
-    if (not subq) and (not price):
+    prange = parse_range(price)
+
+    if (not subq) and (not prange):
         return None
 
     q = Q.HasChild('price')
@@ -46,14 +51,12 @@ def build_child_conds(suppliers, regions, price):
     if subq:
         q.set_query(Q.And(*subq))
 
-    if price:
-        pt = parse_range(price)
-        if pt:
-            q.set_filter(
-                Q.Nested('prices').set_filter(
-                    Q.Range('price.value', pt)
-                )
+    if prange:
+        q.set_filter(
+            Q.Nested('prices').set_filter(
+                Q.Range('price.value', prange)
             )
+        )
 
     return q
 
