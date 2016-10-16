@@ -16,6 +16,36 @@ class Exists(Cond):
         return tree
 
 
+class Nested(Cond):
+
+    def __init__(self, name, query=None):
+        self._name = name
+        self._query = query
+        self._filter = None
+
+    def set_query(self, cond=None):
+        self._query = cond
+        return self
+
+    def set_filter(self, cond=None):
+        self._filter = cond
+        return self
+
+    def attach(self, tree):
+        d = {
+            'path': self._name,
+        }
+        if self._query:
+            self._query.attach(d.setdefault('query', {}))
+
+        if self._filter:
+            self._filter.attach(d.setdefault('filter', {}))
+
+        tree['nested'] = d
+
+        return tree
+
+
 class Match(KVCond):
 
     def attach(self, tree):

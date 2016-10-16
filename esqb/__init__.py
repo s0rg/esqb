@@ -1,7 +1,11 @@
 
-from esqb.query import Query
-
+from esqb.query import (
+    Query,
+    QueryAgg,
+    QueryConst,
+)
 from esqb.conds.common import (
+    Nested,
     Exists,
     Match,
     Fuzzy,
@@ -22,9 +26,12 @@ from esqb.conds.compound import (
 
 __all__ = [
     'Query',
+    'QueryAgg',
+    'QueryConst',
     'And',
     'Or',
     'Not',
+    'Nested',
     'Exists',
     'HasChild',
     'HasParent',

@@ -1,20 +1,19 @@
 import json
 
 
-class Query(object):
+class BaseQuery(object):
 
-    def __init__(self):
-        self._query = {
-            'query': {
-                'constant_score': {
-                }
-            }
-        }
+    def __init__(self, name, constant=False, has_filter=True):
+        self._query = {}
+        r = self._query.setdefault(name, {})
+        if constant:
+            r = r.setdefault('constant_score', {})
+        if has_filter:
+            r = r.setdefault('filter', {})
+        self._root = r
 
     def Where(self, cond):
-        cond.attach(
-            self._query['query']['constant_score']
-        )
+        cond.attach(self._root)
         return self
 
     def Sort(self, *args, **kwargs):
@@ -35,3 +34,22 @@ class Query(object):
 
     def __repr__(self):
         return json.dumps(self._query)
+
+
+class Query(BaseQuery):
+
+    def __init__(self):
+        super().__init__('query')
+
+
+class QueryConst(BaseQuery):
+
+    def __init__(self):
+        super().__init__('query', True)
+
+
+class QueryAgg(BaseQuery):
+
+    def __init__(self):
+        super().__init__('aggs', False, False)
+

@@ -19,10 +19,21 @@ class HasRelationCond(Cond):
         self.who = who
         self.wtype = wtype
         self.cond = cond
+        self._filter = None
 
     def attach(self, tree):
-        tree[self.who] = {
+        d = {
             'type': self.wtype,
             'query': self.cond.attach({}),
         }
+        if self._filter:
+            self._filter.attach(
+                d.setdefault('filter', {})
+            )
+
+        tree[self.who] = d
         return tree
+
+    def set_filter(self, cond):
+        self._filter = cond
+        return self
