@@ -3,8 +3,8 @@ import json
 
 class BaseQuery(object):
 
-    def __init__(self, name, constant=False, has_filter=True):
-        self._query = {}
+    def __init__(self, name, constant=False, has_filter=True, **kwargs):
+        self._query = kwargs
         r = self._query.setdefault(name, {})
         if constant:
             r = r.setdefault('constant_score', {})
@@ -38,18 +38,17 @@ class BaseQuery(object):
 
 class Query(BaseQuery):
 
-    def __init__(self):
-        super().__init__('query')
+    def __init__(self, **kwargs):
+        super().__init__('query', **kwargs)
 
 
 class QueryConst(BaseQuery):
 
-    def __init__(self):
-        super().__init__('query', True)
+    def __init__(self, **kwargs):
+        super().__init__('query', True, **kwargs)
 
 
 class QueryAgg(BaseQuery):
 
-    def __init__(self):
-        super().__init__('aggs', False, False)
-
+    def __init__(self, **kwargs):
+        super().__init__('aggs', False, False, **kwargs)

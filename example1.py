@@ -51,5 +51,6 @@ if __name__ == '__main__':
 
     print(json.dumps(
         json.loads(repr(q)),
-        indent=4)
-    )
+        indent=4,
+        sort_keys=True
+    ))
