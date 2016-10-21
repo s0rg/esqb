@@ -49,7 +49,7 @@ def build_child_conds(suppliers, regions, price):
     q = Q.HasChild('nom_prices')
 
     if subq:
-        q.set_query(Q.And(*subq))
+        q.set_query(Q.And(subq))
 
     if prange:
         q.set_filter(
@@ -117,8 +117,12 @@ if __name__ == '__main__':
 
     if search_string:
         filter_conds.append(
-            Q.Or(*[
-                Q.Match(n, search_string) for n in ('name', 'man_code', 'code')
+            Q.Or([
+                Q.Match(n, search_string) for n in (
+                    'name',
+                    'man_code',
+                    'code'
+                )
             ])
         )
 
@@ -135,7 +139,7 @@ if __name__ == '__main__':
             ),
             # or
             Q.And(
-                *filter_conds
+                filter_conds
             )
         )
     )
