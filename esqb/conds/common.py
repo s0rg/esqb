@@ -29,11 +29,10 @@ class Type(metaclass=KVMeta):
     pass
 
 
-class Exists(KVCond):
+class Exists(metaclass=KVMeta):
 
     def __init__(self, key, **kwargs):
         super().__init__('field', key, **kwargs)
-        self.term = 'exists'
 
 
 class Term(KVCond):
