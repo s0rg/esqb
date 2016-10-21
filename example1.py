@@ -26,6 +26,7 @@ if __name__ == '__main__':
                 Q.Range('key', (0, 10)),
                 Q.IsTrue('bool_key'),
                 Q.IsFalse('bool_key2'),
+                Q.Exists('foo'),
             )
         )
     )

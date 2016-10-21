@@ -1,5 +1,4 @@
 from .base import (
-    Cond,
     KVCond,
     KVMeta,
     CompoundCond,
@@ -30,31 +29,11 @@ class Type(metaclass=KVMeta):
     pass
 
 
-class Exists(Cond):
+class Exists(KVCond):
 
     def __init__(self, key, **kwargs):
-        super().__init__(**kwargs)
-        self.key = key
-
-    def attach(self, tree):
-        tree['exists'] = self.fill({
-            'field': self.key
-        })
-        return tree
-
-
-class Nested(CompoundCond):
-
-    def __init__(self, name, cond=None, **kwargs):
-        super().__init__(**kwargs)
-        self._name = name
-        self.set_query(cond)
-
-    def attach(self, tree):
-        tree['nested'] = self.join({
-            'path': self._name,
-        })
-        return tree
+        super().__init__('field', key, **kwargs)
+        self.term = 'exists'
 
 
 class Term(KVCond):
@@ -89,5 +68,19 @@ class Range(KVCond):
                 'gte': _min,
                 'lte': _max
             }
+        })
+        return tree
+
+
+class Nested(CompoundCond):
+
+    def __init__(self, name, cond=None, **kwargs):
+        super().__init__(**kwargs)
+        self._name = name
+        self.set_query(cond)
+
+    def attach(self, tree):
+        tree['nested'] = self.join({
+            'path': self._name,
         })
         return tree

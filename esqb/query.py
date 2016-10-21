@@ -12,8 +12,9 @@ class BaseQuery(object):
             r = r.setdefault('filter', {})
         self._root = r
 
-    def Where(self, cond):
+    def Where(self, cond, **kwargs):
         cond.attach(self._root)
+        self._root.update(kwargs)
         return self
 
     def Sort(self, *args, **kwargs):
