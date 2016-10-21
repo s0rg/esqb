@@ -77,24 +77,6 @@ class KVCond(Cond):
         return tree
 
 
-class HasRelationCond(CompoundCond):
-    '''
-    Base for relation conditionals
-    '''
-
-    def __init__(self, who, wtype, cond, **kwargs):
-        super().__init__(**kwargs)
-        self.who = who
-        self.wtype = wtype
-        self.set_query(cond)
-
-    def attach(self, tree):
-        tree[self.who] = self.join({
-            'type': self.wtype,
-        })
-        return tree
-
-
 class KVMeta(type):
     '''
     Helper meta to build simple queries, creates child of KVCond,
